@@ -64,4 +64,8 @@ export default class LoanService {
         return await this.loanDb.repayLoan(loanId, amount);
     }
 
+    public async defaultRepayments(): Promise<number> {
+        return await this.loanDb.defaultRepayments();
+    }
+
 }

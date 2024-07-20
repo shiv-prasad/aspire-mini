@@ -5,7 +5,7 @@ import { Loan } from './loan';
 
 export const LoanActivity = sequelize.define('LoanActivity', {
     activity: {
-        type: ENUM(LoanActivityType.REQUEST_CREATED, LoanActivityType.LOAN_APPROVED, LoanActivityType.LOAN_REJECTED, LoanActivityType.REPAYMENT_DONE, LoanActivityType.LOAN_CLOSED),
+        type: ENUM(LoanActivityType.REQUEST_CREATED, LoanActivityType.LOAN_APPROVED, LoanActivityType.LOAN_REJECTED, LoanActivityType.REPAYMENT_DONE, LoanActivityType.LOAN_CLOSED, LoanActivityType.DEFAULTED),
         allowNull: false,
     },
     metadata: {

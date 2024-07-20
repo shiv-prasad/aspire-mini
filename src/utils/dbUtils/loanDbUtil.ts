@@ -1,4 +1,4 @@
-import { Model, Transaction } from "sequelize";
+import { Model, Transaction, Op } from "sequelize";
 import { CustomError } from "../../classes/customError";
 import { sequelize } from "../../config/database";
 import { LoanActivityType, LoanStatus, LoanTermType, RepaymentActivityType, RepaymentScheduleStatus } from "../../enums/loan";
@@ -230,7 +230,12 @@ export default class LoanDB {
             const pendingRepayments: any = await RepaymentSchedule.findOne({
                 where: {
                     LoanId: loanId,
-                    status: RepaymentScheduleStatus.APPROVED
+                    status: {
+                        [Op.in]: [
+                            RepaymentScheduleStatus.APPROVED, 
+                            RepaymentScheduleStatus.DEFAULTED
+                        ]
+                    }
                 },
                 order: [['paymentDate', 'ASC']],
                 transaction: t
@@ -315,6 +320,67 @@ export default class LoanDB {
             return loan;
         } catch (error) {
             await t.rollback();
+            throw error;
+        }
+    }
+
+    async defaultRepayments(): Promise<number> {
+        const transaction = await sequelize.transaction();
+        try {
+
+            // Find all approved repayment schedules with past payment dates
+            const repaymentSchedules = await RepaymentSchedule.findAll({
+                where: {
+                    status: RepaymentScheduleStatus.APPROVED,
+                    paymentDate: {
+                        [Op.lt]: new Date()
+                    }
+                },
+                transaction
+            });
+
+            // Get unique loan IDs from the repayment schedules
+            const loanIds = [...new Set(repaymentSchedules.map((schedule: any) => schedule.LoanId))];
+
+            // Update repayment schedules to 'DEFAULTED'
+            const updatePromises = repaymentSchedules.map(schedule =>
+                schedule.update({ status: RepaymentScheduleStatus.DEFAULTED }, { transaction })
+            );
+
+            await Promise.all(updatePromises);
+
+            // Add repayment activities
+            const repaymentActivityPromises = repaymentSchedules.map((schedule: any) =>
+                RepaymentActivity.create({
+                    activity: RepaymentActivityType.DEFAULTED,
+                    LoanId: schedule.LoanId,
+                    metadata: {
+                        scheduleId: schedule.id,
+                        defaultDate: new Date(),
+                    }
+                }, { transaction })
+            );
+
+            await Promise.all(repaymentActivityPromises);
+
+            // Add loan activities for each unique loan ID
+            const loanActivityPromises = loanIds.map(loanId =>
+                LoanActivity.create({
+                    LoanId: loanId,
+                    activity: LoanActivityType.DEFAULTED,
+                    metadata: {
+                        defaultDate: new Date(),
+                    }
+                }, { transaction })
+            );
+
+            await Promise.all(loanActivityPromises);
+
+            // Commit the transaction
+            await transaction.commit();
+            return loanIds.length;
+        } catch (error) {
+            await transaction.rollback();
             throw error;
         }
     }
