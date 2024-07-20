@@ -1,0 +1,16 @@
+{
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "moduleFileExtensions": ["ts", "js"],
+    "rootDir": "./tests",
+    "testMatch": ["**/*.spec.ts"],
+    "transform": {
+        "^.+\\.ts$": "ts-jest"
+    },
+    "coverageDirectory": "./coverage",
+    "collectCoverageFrom": [
+        "src/**/*.ts",
+        "!src/**/*.spec.ts"
+    ],
+    "setupFilesAfterEnv": ["<rootDir>/setupTests.ts"]
+}
