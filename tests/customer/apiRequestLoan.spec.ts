@@ -86,6 +86,65 @@ describe('CustomerController - RequestLoan', () => {
         expect(response.status).toBe(400);
     });
 
+    test("Bad Request when amount is invalid", async () => {
+        await request(app)
+            .post('/customer/request-loan')
+            .set('username', 'testuser')
+            .send({
+                amount: "test",
+                terms: 3
+            }).expect(400)
+        await request(app)
+            .post('/customer/request-loan')
+            .set('username', 'testuser')
+            .send({
+                amount: -5,
+                terms: 3
+            }).expect(400)
+        await request(app)
+            .post('/customer/request-loan')
+            .set('username', 'testuser')
+            .send({
+                amount: 0,
+                terms: 3
+            }).expect(400)
+    });
+
+    test("Bad Request when terms is invalid", async () => {
+        await request(app)
+            .post('/customer/request-loan')
+            .set('username', 'testuser')
+            .send({
+                amount: 3000,
+                terms: "test"
+            }).expect(400)
+        await request(app)
+            .post('/customer/request-loan')
+            .set('username', 'testuser')
+            .send({
+                amount: 3000,
+                terms: -1
+            }).expect(400)
+        await request(app)
+            .post('/customer/request-loan')
+            .set('username', 'testuser')
+            .send({
+                amount: 3000,
+                terms: 0
+            }).expect(400)
+    });
+
+    test("Bad Request when termType is invalid", async () => {
+        await request(app)
+            .post('/customer/request-loan')
+            .set('username', 'testuser')
+            .send({
+                amount: 3000,
+                terms: 1,
+                termType: 'test'
+            }).expect(400)
+    });
+
     test("Success when no term type is given", async () => {
         const response = await request(app)
             .post('/customer/request-loan')

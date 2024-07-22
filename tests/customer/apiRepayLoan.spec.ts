@@ -128,6 +128,30 @@ describe('CustomerController - RepayLoan', () => {
         expect(response.status).toBe(400);
     });
 
+    test("Bad Request when amount is invalid", async () => {
+        await request(app)
+            .post('/customer/repay-loan')
+            .set('username', 'testuser')
+            .send({
+                loanId: 1,
+                amount: "test"
+            }).expect(400)
+        await request(app)
+            .post('/customer/repay-loan')
+            .set('username', 'testuser')
+            .send({
+                loanId: 1,
+                amount: -2
+            }).expect(400)
+        await request(app)
+            .post('/customer/repay-loan')
+            .set('username', 'testuser')
+            .send({
+                loanId: 1,
+                amount: 0
+            }).expect(400)
+    });
+
     test("Bad Request when loanId is missing", async () => {
         const response = await request(app)
             .post('/customer/repay-loan')
