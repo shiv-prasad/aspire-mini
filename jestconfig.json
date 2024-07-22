@@ -12,5 +12,5 @@
         "src/**/*.ts",
         "!src/**/*.spec.ts"
     ],
-    "setupFilesAfterEnv": ["<rootDir>/setupTests.ts"]
+    "maxWorkers": 1
 }

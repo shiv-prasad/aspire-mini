@@ -4,7 +4,6 @@ import { LoanCreationRequest, LoanRepaymentRequest, LoanVerificationRequest } fr
 import LoanDB from "../utils/dbUtils/loanDbUtil";
 
 export default class LoanService {
-
     private loanDb: LoanDB
 
     constructor(loanDb: LoanDB) {
@@ -30,11 +29,6 @@ export default class LoanService {
 
     public async getLoanRepaymentActivity(loanId: string): Promise<Model<any, any>[]> {
         return await this.loanDb.getLoanRepaymentActivity(loanId)
-    }
-
-    public async getLoanCustomerId(loanId: string): Promise<string | null> {
-        const loanInfo = await this.loanDb.getLoanInfo(loanId)
-        return loanInfo?.getDataValue('UserId')
     }
 
     public async requestForLoan(loanRequestPayload: LoanCreationRequest, customer_id: string): Promise<Model<any, any>> {

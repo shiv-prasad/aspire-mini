@@ -6,9 +6,7 @@ import { CreateCustomerRequest } from "../types/customer";
 import UserDB from "../utils/dbUtils/userDbUtil";
 
 export default class CustomerService {
-
     private userDb: UserDB;
-
 
     constructor(userDb: UserDB) {
         this.userDb = userDb;

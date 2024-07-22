@@ -1,12 +1,9 @@
 import { Request, Response, NextFunction, Router } from 'express';
 import UserAuthorizationMiddleware from '../middlewares/user';
 import { AuthorizedRequest } from '../types/request';
-
-import { LoanController } from '../controllers';
 import { BaseRouter } from './baseRouter';
 import LoanMiddleware from '../middlewares/loan';
 import { ActivityController } from '../controllers';
-
 
 export class ActivityRouter extends BaseRouter {
     private controller: ActivityController;

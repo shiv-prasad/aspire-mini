@@ -2,10 +2,8 @@ import { Request, Response, NextFunction, Router } from 'express';
 import AdminMiddleware from '../middlewares/admin';
 import UserAuthorizationMiddleware from '../middlewares/user';
 import { AuthorizedRequest } from '../types/request';
-
 import { AdminController } from '../controllers';
 import { BaseRouter } from './baseRouter';
-
 
 export class AdminRouter extends BaseRouter {
     private controller: AdminController;

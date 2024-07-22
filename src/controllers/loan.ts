@@ -1,12 +1,9 @@
 import { Response, NextFunction } from 'express';
 import { CustomError } from '../classes/customError';
 import LoanService from '../services/loan';
-
 import { AuthorizedRequest } from "../types/request";
 
-
 export default class LoansController {
-
     loanService: LoanService;
 
     constructor(loanService: LoanService) {

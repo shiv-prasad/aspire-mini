@@ -48,7 +48,7 @@ export default class LoanDB {
                             WHEN \`Loan\`.\`status\` = '${LoanStatus.REJECTED}' THEN 4
                             ELSE 5
                         END
-                    `), 
+                    `),
                     'ASC'
                 ],
                 ['createdAt', 'ASC']
@@ -118,12 +118,12 @@ export default class LoanDB {
     }
 
     async createLoan(
-        loanAmount: number, 
-        totalTerms: number, 
-        loanTermType: LoanTermType, 
+        loanAmount: number,
+        totalTerms: number,
+        loanTermType: LoanTermType,
         customer_id: string
     ): Promise<Model<any, any>> {
-        const t: Transaction = await sequelize.transaction();
+        const t: Transaction = await sequelize.transaction({ isolationLevel: Transaction.ISOLATION_LEVELS.SERIALIZABLE });
         try {
             const loan = await Loan.create({
                 totalAmount: loanAmount,
@@ -175,7 +175,7 @@ export default class LoanDB {
     }
 
     async verifyLoan(loanId: number, status: LoanStatus, remark: string, admin_id: number): Promise<Model<any, any>> {
-        const t: Transaction = await sequelize.transaction();
+        const t: Transaction = await sequelize.transaction({ isolationLevel: Transaction.ISOLATION_LEVELS.SERIALIZABLE });
         try {
             const loan = await Loan.findByPk(loanId, { transaction: t });
             if (!loan) {
@@ -211,10 +211,9 @@ export default class LoanDB {
     }
 
     async repayLoan(loanId: string, amount: number) {
-        const t: Transaction = await sequelize.transaction();
+        const t: Transaction = await sequelize.transaction({ isolationLevel: Transaction.ISOLATION_LEVELS.SERIALIZABLE });
         try {
             const loan = await Loan.findByPk(loanId, { transaction: t });
-            
             if (!loan) {
                 throw new CustomError('Loan not found!', HttpStatusCodes.BAD_REQUEST)
             }
@@ -232,7 +231,7 @@ export default class LoanDB {
                     LoanId: loanId,
                     status: {
                         [Op.in]: [
-                            RepaymentScheduleStatus.APPROVED, 
+                            RepaymentScheduleStatus.APPROVED,
                             RepaymentScheduleStatus.DEFAULTED
                         ]
                     }
@@ -256,16 +255,16 @@ export default class LoanDB {
                 await firstSchedule.update({ status: RepaymentScheduleStatus.PAID }, { transaction: t });
                 await RepaymentActivity.create({
                     activity: RepaymentActivityType.PAYMENT_MADE,
-                    metadata: { 
-                        amount, 
-                        scheduleId: firstSchedule.getDataValue("id") 
+                    metadata: {
+                        amount,
+                        scheduleId: firstSchedule.getDataValue("id")
                     },
                     LoanId: loanId
                 }, { transaction: t });
             }
 
             const newRemainingAmount = parseFloat(loan.getDataValue("remainingAmount")) - amount;
-            await loan.update({ 
+            await loan.update({
                 remainingAmount: newRemainingAmount,
                 lastPaymentDate: new Date()
             }, { transaction: t });
@@ -276,37 +275,9 @@ export default class LoanDB {
                 LoanId: loanId
             }, { transaction: t });
 
-            if (remainingRepaymentAmount > 0 && newRemainingAmount > 0) {
-                const remainingSchedules = await RepaymentSchedule.findAll({
-                    where: {
-                        LoanId: loanId,
-                        status: RepaymentScheduleStatus.APPROVED
-                    },
-                    order: [['paymentDate', 'ASC']],
-                    transaction: t
-                });
-    
-                if (remainingSchedules.length > 0) {
-                    const rebalanceAmount = (newRemainingAmount) / remainingSchedules.length;
-                    for (let schedule of remainingSchedules) {
-                        await schedule.update({ 
-                            totalAmount: rebalanceAmount 
-                        }, { transaction: t });
-                    }
-                    await RepaymentActivity.create({
-                        activity: RepaymentActivityType.SCHEDULE_UPDATED,
-                        metadata: { 
-                            amount: rebalanceAmount, 
-                            scheduleId: firstSchedule.getDataValue("id") 
-                        },
-                        LoanId: loanId
-                    }, { transaction: t });
-                }
-            } 
-            
             if (newRemainingAmount == 0) {
                 // If there is no remaining amount, close the loan
-                await loan.update({ 
+                await loan.update({
                     status: LoanStatus.PAID,
                     closingDate: new Date()
                 }, { transaction: t });
@@ -314,7 +285,33 @@ export default class LoanDB {
                     activity: LoanActivityType.LOAN_CLOSED,
                     LoanId: loanId
                 }, { transaction: t });
-            }            
+            }
+
+            const remainingSchedules = await RepaymentSchedule.findAll({
+                where: {
+                    LoanId: loanId,
+                    status: RepaymentScheduleStatus.APPROVED
+                },
+                order: [['paymentDate', 'ASC']],
+                transaction: t
+            });
+
+            if (remainingSchedules.length > 0) {
+                const rebalanceAmount = (newRemainingAmount) / remainingSchedules.length;
+                for (let schedule of remainingSchedules) {
+                    await schedule.update({
+                        totalAmount: rebalanceAmount
+                    }, { transaction: t });
+                }
+                await RepaymentActivity.create({
+                    activity: RepaymentActivityType.SCHEDULE_UPDATED,
+                    metadata: {
+                        amount: rebalanceAmount,
+                        scheduleId: firstSchedule.getDataValue("id")
+                    },
+                    LoanId: loanId
+                }, { transaction: t });
+            }
 
             await t.commit();
             return loan;
@@ -325,7 +322,7 @@ export default class LoanDB {
     }
 
     async defaultRepayments(): Promise<number> {
-        const transaction = await sequelize.transaction();
+        const transaction: Transaction = await sequelize.transaction({ isolationLevel: Transaction.ISOLATION_LEVELS.SERIALIZABLE });
         try {
 
             // Find all approved repayment schedules with past payment dates

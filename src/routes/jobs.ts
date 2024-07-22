@@ -5,7 +5,6 @@ import { BaseRouter } from './baseRouter';
 import { JobsController } from '../controllers';
 import AdminMiddleware from '../middlewares/admin';
 
-
 export class JobsRouter extends BaseRouter {
     private controller: JobsController;
     private userAuthorizationMiddleware: UserAuthorizationMiddleware

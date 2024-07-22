@@ -9,9 +9,8 @@ import { AuthorizedRequest } from '../types/request';
 import { CustomerDetailResponse } from '../types/response';
 
 export default class CustomerController {
-
-    customerService: CustomerService;
-    loanService: LoanService;
+    private customerService: CustomerService;
+    private loanService: LoanService;
     
     constructor(customerService: CustomerService, loanService: LoanService) {
         this.customerService = customerService;
@@ -34,7 +33,7 @@ export default class CustomerController {
                 totalLiability: 0,
                 totalPaid: 0,
             }
-            const loans = await this.loanService.getAllLoans(req.user.getDataValue('id'));
+            const loans = await this.loanService.getAllLoans({UserId: req.user.getDataValue('id')});
             response.totalLoans = loans.length;
             response.requestedLoans = loans.filter(loan => loan.getDataValue('status') === LoanStatus.PENDING).length;
             response.rejectedLoans = loans.filter(loan => loan.getDataValue('status') === LoanStatus.REJECTED).length;
@@ -85,8 +84,12 @@ export default class CustomerController {
                 next(new CustomError(`Missing amount / loanId field`, HttpStatusCodes.BAD_REQUEST));
                 return
             }
-            let loanCustomer = await this.loanService.getLoanCustomerId(loanId)
-            if (loanCustomer != req.user?.getDataValue('id')) {
+            const loan = await this.loanService.getLoanInfo(loanId)
+            if (!loan) {
+                next(new CustomError(`Loan not found`, HttpStatusCodes.BAD_REQUEST))
+                return
+            }
+            if (loan.getDataValue('UserId') != req.user?.getDataValue('id')) {
                 next(new CustomError(`Unauthorized loan access`, HttpStatusCodes.UNAUTHORIZED))
                 return
             }

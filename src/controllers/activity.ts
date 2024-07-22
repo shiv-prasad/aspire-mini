@@ -1,13 +1,10 @@
 import { Response, NextFunction } from 'express';
 import { CustomError } from '../classes/customError';
 import LoanService from '../services/loan';
-
 import { AuthorizedRequest } from "../types/request";
 
-
 export default class ActivityController {
-
-    loanService: LoanService;
+    private loanService: LoanService;
 
     constructor(loanService: LoanService) {
         this.loanService = loanService;
@@ -31,7 +28,6 @@ export default class ActivityController {
             res.json(await this.loanService.getLoanRepaymentActivity(req.params['id']))
             next()
         } catch (err: any) {
-            // console.log(err);
             if (err instanceof CustomError) {
                 next(err);
             } else {

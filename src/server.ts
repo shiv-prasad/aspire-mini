@@ -9,34 +9,27 @@ async function seed() {
     await Promise.all([
         User.create({
             id: 1,
-            firstName: 'Harry',
-            lastName: 'Potter',
-            username: 'harrypotter',
+            firstName: 'Test User',
+            lastName: 'One',
+            username: 'testuserone',
             role: UserRole.CUSTOMER
         }),
         User.create({
             id: 2,
-            firstName: 'Hermione',
-            lastName: 'Granger',
-            username: 'hermionegranger',
+            firstName: 'Test User',
+            lastName: 'Two',
+            username: 'testusertwo',
             role: UserRole.CUSTOMER
         }),
         User.create({
             id: 3,
-            firstName: 'Ron',
-            lastName: 'Weasley',
-            username: 'ronweasley',
-            role: UserRole.CUSTOMER
-        }),
-        User.create({
-            id: 4,
-            firstName: 'Shiv',
-            lastName: 'Prasad',
-            username: 'shivprasad',
+            firstName: 'Admin',
+            lastName: 'User',
+            username: 'adminuser',
             role: UserRole.ADMIN
         }),
         User.create({
-            id: 5,
+            id: 4,
             firstName: 'Cron',
             lastName: 'User',
             username: 'cronuser',

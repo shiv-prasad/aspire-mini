@@ -9,7 +9,6 @@ import { LoanVerificationRequest } from '../types/loan';
 import { AuthorizedRequest } from '../types/request';
 
 export default class AdminController {
-    
     private customerService: CustomerService;
     private loanService: LoanService;
 

@@ -1,11 +1,9 @@
 import { Request, Response, NextFunction, Router } from 'express';
 import UserAuthorizationMiddleware from '../middlewares/user';
 import { AuthorizedRequest } from '../types/request';
-
 import { BaseRouter } from './baseRouter';
 import CustomerMiddleware from '../middlewares/customer';
 import { CustomerController } from '../controllers';
-
 
 export class CustomerRouter extends BaseRouter {
     private controller: CustomerController;
