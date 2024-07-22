@@ -1,5 +1,6 @@
 import { Model, Transaction, Op } from "sequelize";
 import { CustomError } from "../../classes/customError";
+import { ValidationError } from "../../classes/validationError";
 import { sequelize } from "../../config/database";
 import { LoanActivityType, LoanStatus, LoanTermType, RepaymentActivityType, RepaymentScheduleStatus } from "../../enums/loan";
 import { HttpStatusCodes } from "../../enums/requestHelper";
@@ -179,11 +180,11 @@ export default class LoanDB {
         try {
             const loan = await Loan.findByPk(loanId, { transaction: t });
             if (!loan) {
-                throw new CustomError('Loan not found!', HttpStatusCodes.BAD_REQUEST)
+                throw new ValidationError('Loan not found!')
             }
 
             if (loan.getDataValue('status') !== LoanStatus.PENDING) {
-                throw new CustomError('Loan is not open for verification!', HttpStatusCodes.BAD_REQUEST)
+                throw new ValidationError('Loan is not open for verification!')
             }
 
             await loan.update({ status: status }, { transaction: t });
@@ -215,15 +216,15 @@ export default class LoanDB {
         try {
             const loan = await Loan.findByPk(loanId, { transaction: t });
             if (!loan) {
-                throw new CustomError('Loan not found!', HttpStatusCodes.BAD_REQUEST)
+                throw new ValidationError('Loan not found!')
             }
 
             if (loan.getDataValue('status') !== LoanStatus.APPROVED) {
-                throw new CustomError('Loan is not open for repayment!', HttpStatusCodes.BAD_REQUEST)
+                throw new ValidationError('Loan is not open for repayment!')
             }
 
             if (amount > parseFloat(loan.getDataValue("remainingAmount"))) {
-                throw new CustomError('Repayment amount exceeds the remaining loan amount', HttpStatusCodes.BAD_REQUEST)
+                throw new ValidationError('Repayment amount exceeds the remaining loan amount')
             }
 
             const pendingRepayments: any = await RepaymentSchedule.findOne({
@@ -241,11 +242,11 @@ export default class LoanDB {
             });
 
             if (!pendingRepayments) {
-                throw new CustomError('No pending repayment schedules found', HttpStatusCodes.BAD_REQUEST)
+                throw new ValidationError('No pending repayment schedules found')
             }
 
             if (amount < parseFloat(pendingRepayments.getDataValue("totalAmount"))) {
-                throw new CustomError('Amount is less than the next repayment schedule amount', HttpStatusCodes.BAD_REQUEST)
+                throw new ValidationError('Amount is less than the next repayment schedule amount')
             }
 
             let remainingRepaymentAmount = amount;

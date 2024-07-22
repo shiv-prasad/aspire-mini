@@ -1,12 +1,14 @@
 import { Response, NextFunction } from 'express';
 import { CustomError } from '../classes/customError';
-import { LoanStatus } from '../enums/loan';
+import { ValidationError } from '../classes/validationError';
 import { HttpStatusCodes } from '../enums/requestHelper';
 import CustomerService from '../services/customer';
 import LoanService from '../services/loan';
 import { CreateCustomerRequest } from '../types/customer';
 import { LoanVerificationRequest } from '../types/loan';
 import { AuthorizedRequest } from '../types/request';
+import { CreateCustomerValidator } from '../validators/createCustomerValidator';
+import { LoanVerificationValidator } from '../validators/verifyLoanValidator';
 
 export default class AdminController {
     private customerService: CustomerService;
@@ -36,15 +38,13 @@ export default class AdminController {
     async verifyLoan(req: AuthorizedRequest, res: Response, next: NextFunction) {
         const loanVerificationPayload = req.body as LoanVerificationRequest;
         try {
-            let { status } = loanVerificationPayload;
-            if (![LoanStatus.APPROVED, LoanStatus.REJECTED].includes(status)) {
-                next(new CustomError(`Invalid Loan Status Provided`, HttpStatusCodes.BAD_REQUEST))
-                return;
-            }
+            new LoanVerificationValidator(loanVerificationPayload).validate()
             res.json(await this.loanService.verifyLoan(loanVerificationPayload, req.user?.getDataValue('id')));
             next()
         } catch (err: any) {
-            if (err instanceof CustomError) {
+            if (err instanceof ValidationError) {
+                next(new CustomError(err.message, HttpStatusCodes.BAD_REQUEST, err.additionalInfo));
+            } else if (err instanceof CustomError) {
                 next(err);
             } else {
                 next(new CustomError(`Error while fetching pending loans`))
@@ -55,16 +55,14 @@ export default class AdminController {
     async createCustomer(req: AuthorizedRequest, res: Response, next: NextFunction) {
         const createCustomerPayload = req.body as CreateCustomerRequest;
         try {
-            const { firstName, lastName, username } = createCustomerPayload;
-            if (!firstName || !lastName || !username) {
-                next(new CustomError(`Missing Mandatory fields: firstName, lastName, username!`, HttpStatusCodes.BAD_REQUEST, createCustomerPayload))
-                return;
-            }
+            new CreateCustomerValidator(createCustomerPayload).validate()
             const customer = await this.customerService.create(createCustomerPayload);
             res.json(customer);
             next()
         } catch (err: any) {
-            if (err instanceof CustomError) {
+            if (err instanceof ValidationError) {
+                next(new CustomError(err.message, HttpStatusCodes.BAD_REQUEST, err.additionalInfo));
+            } else if (err instanceof CustomError) {
                 next(err);
             } else {
                 next(new CustomError(`Error while creating customer`))

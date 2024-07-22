@@ -1,5 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { CustomError } from '../classes/customError';
+import { ValidationError } from '../classes/validationError';
 import { LoanStatus } from '../enums/loan';
 import { HttpStatusCodes } from '../enums/requestHelper';
 import CustomerService from '../services/customer';
@@ -7,6 +8,8 @@ import LoanService from '../services/loan';
 import { LoanCreationRequest, LoanRepaymentRequest } from '../types/loan';
 import { AuthorizedRequest } from '../types/request';
 import { CustomerDetailResponse } from '../types/response';
+import { RepayLoanValidator } from '../validators/repayLoanValidator';
+import { RequestLoanValidator } from '../validators/requestLoanValidator';
 
 export default class CustomerController {
     private customerService: CustomerService;
@@ -43,7 +46,7 @@ export default class CustomerController {
             response.totalLiability = loans.reduce((sum, loan) => sum + parseFloat(loan.getDataValue('remainingAmount')), 0);
             
             response.totalPaid = loans.reduce((sum, loan) => {
-                const paidAmount = parseFloat(loan.getDataValue('totalAmount')) - parseFloat(loan.getDataValue('remainingAmount'));
+                const paidAmount: any = parseFloat(loan.getDataValue('totalAmount')) - parseFloat(loan.getDataValue('remainingAmount'));
                 return sum + (paidAmount > 0 ? paidAmount : 0);
             }, 0);
             res.json(response)
@@ -60,15 +63,13 @@ export default class CustomerController {
     async requestLoan(req: AuthorizedRequest, res: Response, next: NextFunction) {
         const loanRequestPayload = req.body as LoanCreationRequest;
         try {
-            let { amount, terms } = loanRequestPayload;
-            if (!amount || !terms) {
-                next(new CustomError(`Missing amount / terms field`, HttpStatusCodes.BAD_REQUEST));
-                return
-            }
+            new RequestLoanValidator(loanRequestPayload).validate()
             res.json(await this.loanService.requestForLoan(loanRequestPayload, req.user?.getDataValue('id')))
             next()
         } catch (err: any) {
-            if (err instanceof CustomError) {
+            if (err instanceof ValidationError) {
+                next(new CustomError(err.message, HttpStatusCodes.BAD_REQUEST, err.additionalInfo));
+            } else if (err instanceof CustomError) {
                 next(err);
             } else {
                 next(new CustomError(`Error while raising loan request`))
@@ -79,24 +80,21 @@ export default class CustomerController {
     async repayLoan(req: AuthorizedRequest, res: Response, next: NextFunction) {
         const loanRepaymentPayload = req.body as LoanRepaymentRequest;
         try {
-            let { amount, loanId } = loanRepaymentPayload;
-            if (!amount || !loanId) {
-                next(new CustomError(`Missing amount / loanId field`, HttpStatusCodes.BAD_REQUEST));
-                return
-            }
+            new RepayLoanValidator(loanRepaymentPayload)
+            let { loanId } = loanRepaymentPayload;
             const loan = await this.loanService.getLoanInfo(loanId)
             if (!loan) {
-                next(new CustomError(`Loan not found`, HttpStatusCodes.BAD_REQUEST))
-                return
+                throw new ValidationError(`Loan not found`)
             }
             if (loan.getDataValue('UserId') != req.user?.getDataValue('id')) {
-                next(new CustomError(`Unauthorized loan access`, HttpStatusCodes.UNAUTHORIZED))
-                return
+                throw new CustomError(`Unauthorized loan access`, HttpStatusCodes.UNAUTHORIZED)
             }
             res.json(await this.loanService.repayLoan(loanRepaymentPayload))
             next()
         } catch (err: any) {
-            if (err instanceof CustomError) {
+            if (err instanceof ValidationError) {
+                next(new CustomError(err.message, HttpStatusCodes.BAD_REQUEST, err.additionalInfo));
+            } else if (err instanceof CustomError) {
                 next(err);
             } else {
                 next(new CustomError(`Error while repaying loan`))
