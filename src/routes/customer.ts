@@ -25,16 +25,20 @@ export class CustomerRouter extends BaseRouter {
     public getRoutes(): Router {
         const router = Router();
 
-        // Middleware
+        // Apply Middleware
+
+        // Apply Middleware to check if user is authorized or not
+        // All the calls will need to pass this middleware
         router.use(`/${this.app}/*`, (req: Request, res: Response, next: NextFunction) => {
             this.userAuthorizationMiddleware.authorizeUser(req as AuthorizedRequest, res, next);
         });
-
+        // Apply Middleware to check if the user is customer or not
+        // Only customers can access the API Controllers
         router.use(`/${this.app}/*`, (req: Request, res: Response, next: NextFunction) => {
             this.customerMiddleware.checkIfCustomer(req as AuthorizedRequest, res, next);
         });
 
-        // Routes
+        // Attach API Controllers to serve routes
         router.get(`/${this.app}/details`, (req: Request, res: Response, next: NextFunction) => {
             this.controller.getUserInfo(req as AuthorizedRequest, res, next)
         });

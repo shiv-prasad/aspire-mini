@@ -4,6 +4,9 @@ import { UserRole } from "../enums/user";
 import { CreateCustomerRequest } from "../types/customer";
 import UserDB from "../utils/dbUtils/userDbUtil";
 
+/**
+ * Customer Related Service Provider
+ */
 export default class CustomerService {
     private userDb: UserDB;
 
@@ -11,6 +14,12 @@ export default class CustomerService {
         this.userDb = userDb;
     }
 
+    /**
+     * Create a new customer
+     * If customer with same username already exists, throw exception
+     * @param createCustomerData 
+     * @returns 
+     */
     public async create(createCustomerData: CreateCustomerRequest): Promise<Model<any, any>> {
         const { firstName, lastName, username } = createCustomerData;
 

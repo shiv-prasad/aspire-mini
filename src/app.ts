@@ -38,7 +38,7 @@ const adminController = new AdminController(
     customerService, 
     loanService,
 );
-const customerController = new CustomerController(customerService, loanService);
+const customerController = new CustomerController(loanService);
 const loanController = new LoanController(loanService);
 const activityController = new ActivityController(loanService);
 const jobsController = new JobsController(loanService);

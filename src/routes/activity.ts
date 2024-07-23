@@ -25,15 +25,19 @@ export class ActivityRouter extends BaseRouter {
     public getRoutes(): Router {
         const router = Router();
 
-        // Middleware
+        // Apply Middleware
+
+        // Apply Middleware to check if user is authorized or not
+        // All the calls will need to pass this middleware
         router.use(`/${this.app}/*`, (req: Request, res: Response, next: NextFunction) => {
             this.userAuthorizationMiddleware.authorizeUser(req as AuthorizedRequest, res, next)
         });
+        // Middleware to check if user can access the loan specified by given id
         router.use(`/${this.app}/:id/*`, (req: Request, res: Response, next: NextFunction) => {
             this.loanMiddleware.checkLoan(req as AuthorizedRequest, res, next)
         });
 
-        // Controllers
+        // Attach API Controllers to serve routes
         router.get(`/${this.app}/:id/loan`, (req: Request, res: Response, next: NextFunction) => {
             this.controller.getLoanActivity(req as AuthorizedRequest, res, next);
         });

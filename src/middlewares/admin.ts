@@ -4,6 +4,9 @@ import { UserRole } from '../enums/user';
 import UserService from '../services/user';
 import { AuthorizedRequest } from '../types/request';
 
+/**
+ * Middleware for Admin Related actions
+ */
 export default class AdminMiddleware {
 
     private userService: UserService;
@@ -12,6 +15,14 @@ export default class AdminMiddleware {
         this.userService = userService;
     }
 
+    /**
+     * Checks if the logged in user is admin or not
+     * If user is not admin, unauthorize the request
+     * @param req 
+     * @param res 
+     * @param next 
+     * @returns 
+     */
     public async checkIfAdmin(req: AuthorizedRequest, res: Response, next: NextFunction) {
         try {
             const userRole: UserRole = await this.userService.getUserRole(req.user)

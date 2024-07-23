@@ -4,6 +4,9 @@ import { UserRole } from '../enums/user';
 import UserService from '../services/user';
 import { AuthorizedRequest } from '../types/request';
 
+/**
+ * Middleware for Customer Related actions
+ */
 export default class CustomerMiddleware {
 
     private userService: UserService;
@@ -12,6 +15,14 @@ export default class CustomerMiddleware {
         this.userService = userService;
     }
 
+    /**
+     * Checks if the logged in user is customer or not
+     * If user is not customer, unauthorize the request
+     * @param req 
+     * @param res 
+     * @param next 
+     * @returns 
+     */
     public async checkIfCustomer(req: AuthorizedRequest, res: Response, next: NextFunction) {
         try {
             const userRole: UserRole = await this.userService.getUserRole(req.user)

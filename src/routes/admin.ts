@@ -25,16 +25,20 @@ export class AdminRouter extends BaseRouter {
     public getRoutes(): Router {
         const router = Router();
 
-        // Middleware
+        // Apply Middleware
+
+        // Apply Middleware to check if user is authorized or not
+        // All the calls will need to pass this middleware
         router.use(`/${this.app}/*`, (req: Request, res: Response, next: NextFunction) => {
             this.userAuthorizationMiddleware.authorizeUser(req as AuthorizedRequest, res, next);
         });
-
+        // Apply Middleware to check if the user is admin or not
+        // Only admins can access the API Controllers
         router.use(`/${this.app}/*`, (req: Request, res: Response, next: NextFunction) => {
             this.adminMiddleware.checkIfAdmin(req as AuthorizedRequest, res, next);
         });
 
-        // Routes
+        // Attach API Controllers to serve routes
         router.get(`/${this.app}/loan-requests`, (req: Request, res: Response, next: NextFunction) => {
             this.controller.getPendingLoanRequests(req as AuthorizedRequest, res, next);
         });
