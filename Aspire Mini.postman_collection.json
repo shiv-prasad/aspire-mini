@@ -1,0 +1,393 @@
+{
+	"info": {
+		"_postman_id": "45eed33a-9a4d-4faf-8587-227b53487a80",
+		"name": "Aspire Mini",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25104998"
+	},
+	"item": [
+		{
+			"name": "Customer",
+			"item": [
+				{
+					"name": "Get Customer Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "username",
+								"value": "testuserone",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "127.0.0.1:3000/customer/details",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "3000",
+							"path": [
+								"customer",
+								"details"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Loan Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "username",
+								"value": "testuserone",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 20000,\n    \"terms\": 5,\n    \"termType\": \"WEEKLY\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "127.0.0.1:3000/customer/request-loan",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "3000",
+							"path": [
+								"customer",
+								"request-loan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Repay Loan",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "username",
+								"value": "testuserone",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loanId\": 1,\n    \"amount\": 1000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "127.0.0.1:3000/customer/repay-loan",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "3000",
+							"path": [
+								"customer",
+								"repay-loan"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Create Customer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "username",
+								"value": "adminuser",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Test\",\n    \"lastName\": \"User\",\n    \"username\": \"testuser\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/admin/create-customer",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"admin",
+								"create-customer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "View Pending Loans",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "username",
+								"value": "adminuser",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:3000/admin/loan-requests",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"admin",
+								"loan-requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Loan",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "username",
+								"value": "adminuser",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loanId\": 1,\n    \"status\": \"APPROVED\",\n    \"remark\": \"remark one\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/admin/verify-loan",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"admin",
+								"verify-loan"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Loans",
+			"item": [
+				{
+					"name": "All Loans",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "username",
+								"value": "adminuser",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "127.0.0.1:3000/loans/all",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "3000",
+							"path": [
+								"loans",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Loan detail",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "username",
+								"value": "adminuser",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:3000/loans/1/detail",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"loans",
+								"1",
+								"detail"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment Schedule",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "username",
+								"value": "adminuser",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:3000/loans/1/payment-schedule",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"loans",
+								"1",
+								"payment-schedule"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Activity",
+			"item": [
+				{
+					"name": "Loan Activity",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "username",
+								"value": "adminuser",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "127.0.0.1:3000/activity/1/loan",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "3000",
+							"path": [
+								"activity",
+								"1",
+								"loan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Repayment Activity",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "username",
+								"value": "testuserone",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "127.0.0.1:3000/activity/1/repayment",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "3000",
+							"path": [
+								"activity",
+								"1",
+								"repayment"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Jobs",
+			"item": [
+				{
+					"name": "Check for Late Payments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "username",
+								"value": "cronuser",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:3000/jobs/check-for-late-payments",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"jobs",
+								"check-for-late-payments"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
