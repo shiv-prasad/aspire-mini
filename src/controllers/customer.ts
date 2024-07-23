@@ -138,7 +138,7 @@ export default class CustomerController {
         const loanRepaymentPayload = req.body as LoanRepaymentRequest;
         try {
             // Validate the repayment payload
-            new RepayLoanValidator(loanRepaymentPayload)
+            new RepayLoanValidator(loanRepaymentPayload).validate()
 
             // Customer can only pay for a loan which is present and belongs to the customer itself
             let { loanId } = loanRepaymentPayload;
